@@ -2,11 +2,13 @@ use std::convert::TryFrom;
 
 use solana_sdk::{
     pubkey::Pubkey,
+    signature::write_keypair_file,
     signer::{keypair::Keypair, Signer},
 };
 
 fn main() {
-    let to_find = "ab".to_ascii_lowercase();
+    let to_find = std::env::args().nth(1).expect("no pattern given");
+
     let char_length = to_find.len();
 
     let mut i = 0;
@@ -30,6 +32,21 @@ fn main() {
 
         if to_match.eq(&to_find) {
             found = true;
+
+            println!(
+                "Found match: Key {} results in {} on Goki Smart Wallet",
+                keypair.pubkey().to_string(),
+                pda_string
+            );
+
+            let filename = "Goki-".to_string() + &pda_string + ".json";
+
+            match write_keypair_file(&keypair, &filename) {
+                Ok(file) => file,
+                Err(error) => panic!("Problem opening the file: {:?}", error),
+            };
+
+            println!("Written to file: {}", filename);
         }
 
         i += 1;
